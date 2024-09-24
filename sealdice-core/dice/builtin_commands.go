@@ -1236,13 +1236,13 @@ func (d *Dice) registerCoreCommands() {
 					
 					if err := StorageInit(); err != nil {
 						fmt.Println("Error initializing storage:", err)
-						return
+						return err
 					}
 
 					giftJsonStr, err := StorageGet("giftJson")
 					if err != nil {
 						fmt.Println("Error getting giftJson:", err)
-						return
+						return err
 					}
 
 					if giftJsonStr == "" {
@@ -1252,7 +1252,7 @@ func (d *Dice) registerCoreCommands() {
 					var giftJson map[string]interface{}
 					if err := json.Unmarshal([]byte(giftJsonStr), &giftJson); err != nil {
 						fmt.Println("Error parsing JSON:", err)
-						return
+						return err
 					}
 
 					getID := func() string {
@@ -1291,31 +1291,31 @@ func (d *Dice) registerCoreCommands() {
 
 						diceResult = UnbalancedRandomness()
 						diceResultExists = true
-						giftJson[uid] := map[string]interface{}{
+						giftJson[uid] = map[string]interface{}{
 							"fed":  0,
 						}
 
 						giftJsonStr, err := json.Marshal(giftJson[uid])
 						if err != nil {
 							fmt.Println("Error marshaling giftJson:", err)
-							return
+							return err
 						}
 
 						if err := StorageSet(uid, string(giftJsonStr)); err != nil {
 							fmt.Println("Error setting giftJson:", err)
-							return
+							return err
 						}
 
 						storedJson, err := StorageGet(uid)
 						if err != nil {
 							fmt.Println("Error getting giftJson:", err)
-							return
+							return err
 						}
 					
 						var storedGiftJson map[string]interface{}
 						if err := json.Unmarshal([]byte(storedJson), &storedGiftJson); err != nil {
 							fmt.Println("Error unmarshaling storedJson:", err)
-							return
+							return err
 						}
 					
 						fmt.Println("Stored giftJson:", storedGiftJson)

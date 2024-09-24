@@ -244,7 +244,7 @@ func calculateCDF(weights []float64) []float64 {
 
 func UnbalancedRandomness() int {
 	// 示例数据
-	inputs := make([]int, 100)
+	inputs := make([]int64, 100)
 	for i := 1; i <= 100; i++ {
 		inputs[i-1] = i
 	}
@@ -265,7 +265,7 @@ func UnbalancedRandomness() int {
 	randomValue := rand.Float64()
 
 	// 查找对应的数字
-	var diceResult int
+	var diceResult int64
 	for i, cdfValue := range cdfValues {
 		if randomValue <= cdfValue {
 			diceResult = inputs[i]
