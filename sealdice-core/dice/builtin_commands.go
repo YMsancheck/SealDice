@@ -1298,7 +1298,6 @@ func (d *Dice) registerCoreCommands() {
 						}
 						forWhat = cmdArgs.CleanArgs
 					}
-				}
 
 				VarSetValueStr(ctx, "$t原因", forWhat)
 				if forWhat != "" {
