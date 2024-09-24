@@ -396,7 +396,7 @@ func (d *Dice) registerCoreCommands() {
 		Solve: func(ctx *MsgContext, msg *Message, cmdArgs *CmdArgs) CmdExecuteResult {
 			arg := cmdArgs.GetArgN(1)
 			if arg == "" {
-				text := "本骰子借助海豹核心 " + VERSION.String() + "魔改构建" +"\n"
+				text := "本骰子借助海豹核心 " + VERSION.String() + "魔改构建" + "\n"
 				text += "非master允许，不允许使用该骰子进行任何活动" + "\n"
 				text += DiceFormatTmpl(ctx, "核心:骰子帮助文本_附加说明")
 				ReplyToSender(ctx, msg, text)
@@ -1192,55 +1192,99 @@ func (d *Dice) registerCoreCommands() {
 						})
 					}
 
-					const giftJson = JSON.parse(ext.storageGet("giftJson") || '{}');
-					let QQ = seal.format(ctx, "{$t账号ID_RAW}");
-					let date = parseInt(seal.format(ctx, "{$tDate}"));
+					if err := StorageInit(); err != nil {
+						fmt.Println("Error initializing storage:", err)
+						return
+					}
 
-					if giftJson[QQ]["fed"] == 1 {
+					giftJsonStr, err := StorageGet("giftJson")
+					if err != nil {
+						fmt.Println("Error getting giftJson:", err)
+						return
+					}
+
+					if giftJsonStr == "" {
+						giftJsonStr = "{}"
+					}
+
+					var giftJson map[string]interface{}
+					if err := json.Unmarshal([]byte(giftJsonStr), &giftJson); err != nil {
+						fmt.Println("Error parsing JSON:", err)
+						return
+					}
+
+					getID := func() string {
+						if cmdArgs.IsArgEqual(2, "user") || cmdArgs.IsArgEqual(2, "group") {
+							id := cmdArgs.GetArgN(3)
+							if id == "" {
+								return ""
+							}
+
+							isGroup := cmdArgs.IsArgEqual(2, "group")
+							return FormatDiceID(ctx, id, isGroup)
+						}
+
+						arg := cmdArgs.GetArgN(2)
+						if !strings.Contains(arg, ":") {
+							return ""
+						}
+						return arg
+					}
+
+					uid := getID()
+
+					fedValue, ok := giftJson[uid].(map[string]interface{})["fed"]
+					if ok {
+						if fedInt, ok := fedValue.(float64); ok && int(fedInt) == 1 {
+							fmt.Println("giftJson[QQ][fed] is 1")
+						} else {
+							fmt.Println("giftJson[QQ][fed] is not 1")
+						}
+					} else {
+						fmt.Println("giftJson[QQ] or giftJson[QQ][fed] not found")
+					}
+
+					if fedValue == 1 {
 						// 调整投点结果的概率分布
-						func calculateWeight(x int) float64 {
-							if x <= 50 {
-								return 2 - 0.02*float64(x)
-							}
-							return 1 - 0.02*float64(x-51)
+
+						diceResult = UnbalancedRandomness()
+						diceResultExists = true
+						giftJson[uid] := map[string]interface{}{
+							"fed":  0,
 						}
 
-						func calculateCDF(weights []float64) []float64 {
-							totalWeight := 0.0
-							for _, w := range weights {
-								totalWeight += w
-							}
-							cdfValues := make([]float64, len(weights))
-							var cumulative float64
-							for i, w := range weights {
-								cumulative += w / totalWeight
-								cdfValues[i] = cumulative
-							}
-							return cdfValues
+						giftJsonStr, err := json.Marshal(giftJson[uid])
+						if err != nil {
+							fmt.Println("Error marshaling giftJson:", err)
+							return
 						}
 
-						cdfValues := calculateCDF(weights)
+						if err := StorageSet(uid, string(giftJsonStr)); err != nil {
+							fmt.Println("Error setting giftJson:", err)
+							return
+						}
 
-						// 生成随机数
-						rand.Seed(time.Now().UnixNano())
-						randomValue := rand.Float64()
+						storedJson, err := StorageGet(uid)
+						if err != nil {
+							fmt.Println("Error getting giftJson:", err)
+							return
+						}
 					
-						// 查找对应的数字
-						for i, cdfValue := range cdfValues {
-							if randomValue <= cdfValue {
-								diceResultesult = int64(i + 1)
-								diceResultExists = true
-								ReplyToSender(ctx, msg, "测试指令成功")
-							}
+						var storedGiftJson map[string]interface{}
+						if err := json.Unmarshal([]byte(storedJson), &storedGiftJson); err != nil {
+							fmt.Println("Error unmarshaling storedJson:", err)
+							return
 						}
+					
+						fmt.Println("Stored giftJson:", storedGiftJson)
+					}
 
-					}else{
+					} else {
 						if r != nil && r.TypeID == 0 {
 							diceResult = r.Value.(int64)
 							diceResultExists = true
 						}
 					}
-
 
 					if err == nil {
 						if forWhat == "" {

@@ -3,10 +3,12 @@ package dice
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
 	"sort"
+	"time"
 
 	"github.com/dop251/goja"
 	"github.com/tidwall/buntdb"
@@ -217,4 +219,60 @@ func (i *ExtInfo) StorageGet(k string) (string, error) {
 	})
 
 	return val, err
+}
+
+func calculateWeight(x int) float64 {
+	if x <= 50 {
+		return 2 - 0.02*float64(x)
+	}
+	return 1 - 0.02*float64(x-51)
+}
+
+func calculateCDF(weights []float64) []float64 {
+	totalWeight := 0.0
+	for _, w := range weights {
+		totalWeight += w
+	}
+	cdfValues := make([]float64, len(weights))
+	var cumulative float64
+	for i, w := range weights {
+		cumulative += w / totalWeight
+		cdfValues[i] = cumulative
+	}
+	return cdfValues
+}
+
+func UnbalancedRandomness() int {
+	// 示例数据
+	inputs := make([]int, 100)
+	for i := 1; i <= 100; i++ {
+		inputs[i-1] = i
+	}
+
+	// 计算权重值
+	weights := make([]float64, 100)
+	for i, x := range inputs {
+		weights[i] = calculateWeight(x)
+	}
+
+	// 计算累积分布函数值
+	cdfValues := calculateCDF(weights)
+
+	// 设置随机种子
+	rand.Seed(time.Now().UnixNano())
+
+	// 生成随机数
+	randomValue := rand.Float64()
+
+	// 查找对应的数字
+	var diceResult int
+	for i, cdfValue := range cdfValues {
+		if randomValue <= cdfValue {
+			diceResult = inputs[i]
+			break
+		}
+	}
+
+	fmt.Printf("随机生成的数字为: %d\n", diceResult)
+	return diceResult
 }
