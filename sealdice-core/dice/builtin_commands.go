@@ -1232,36 +1232,18 @@ func (d *Dice) registerCoreCommands() {
 							DefaultDiceSideNum: getDefaultDicePoints(ctx),
 							DisableBlock:       true,
 						})
-					}			
-
-					ext := ctx.Dice.ExtFind("好感")
-					if ext == nil {
-						ReplyToSender(ctx, msg, "没有找到插件"+extName)
-						return ""
 					}
-
-					giftJsonStr, err := ext.StorageGet("giftJson")
-					if err != nil {
-						fmt.Println("Error getting giftJson:", err)
-						return ""
-					}
-
-					if giftJsonStr == "" {
-						giftJsonStr = "{}"
-					}
-
-					var giftJson map[string]interface{}
 					
-					if err := json.Unmarshal([]byte(giftJsonStr), &giftJson); err != nil {
-						fmt.Println("Error parsing JSON:", err)
-						return ""
+					if r != nil && r.TypeId == ds.VMTypeInt {
+						diceResult = int64(r.MustReadInt())
+						diceResultExists = true
 					}
 
 					getID := func() string {
 						if cmdArgs.IsArgEqual(2, "user") || cmdArgs.IsArgEqual(2, "group") {
 							id := cmdArgs.GetArgN(3)
 							if id == "" {
-								return ""
+								ReplyToSender(ctx, msg, "没有找到ID")
 							}
 
 							isGroup := cmdArgs.IsArgEqual(2, "group")
@@ -1270,51 +1252,65 @@ func (d *Dice) registerCoreCommands() {
 
 						arg := cmdArgs.GetArgN(2)
 						if !strings.Contains(arg, ":") {
-							return ""
+							ReplyToSender(ctx, msg, "没有找到ID")
 						}
 						return arg
 					}
 
-					uid := getID()
+					ext := ctx.Dice.ExtFind("好感")
 
-					fedValue, ok := giftJson[uid].(map[string]interface{})["fed"]
-					if ok {
-						if fedInt, ok := fedValue.(float64); ok && int(fedInt) == 1 {
-							fmt.Println("giftJson[QQ][fed] is 1")
-						} else {
-							fmt.Println("giftJson[QQ][fed] is not 1")
-						}
-					} else {
-						fmt.Println("giftJson[QQ] or giftJson[QQ][fed] not found")
-					}
-
-					if fedValue == 1 {
-						// 调整投点结果的概率分布
-
-						diceResult = UnbalancedRandomness()
-						diceResultExists = true
-						giftJson[uid] = map[string]interface{}{
-							"fed":  0,
-						}
-
-						giftJsonStr, err := json.Marshal(giftJson)
-						if err != nil {
-							fmt.Println("Error marshaling JSON:", err)
-							return ""
-						}
-
-						if err := ext.StorageSet("giftJson", string(jsonString)); err != nil {
-							fmt.Println("Error setting data:", err)
-							return ""
-						}
-						
+					if ext == nil {
+						ReplyToSender(ctx, msg, "没有找到插件"+"好感")
 					}else{
-						if r != nil && r.TypeId == ds.VMTypeInt {
-							diceResult = int64(r.MustReadInt())
-							diceResultExists = true
+						giftJsonStr, err := ext.StorageGet("giftJson")
+						if err != nil {
+							fmt.Println("无法正确获取giftJson:", err)
+						}else{
+							if giftJsonStr == "" {
+								giftJsonStr = "{}"
+							}
+							var giftJson map[string]interface{}
+					
+							if err := json.Unmarshal([]byte(giftJsonStr), &giftJson); err != nil {
+								fmt.Println("解析Json时出错:", err)
+							}
+
+							uid := getID()
+
+							fedValue, ok := giftJson[uid].(map[string]interface{})["fed"]
+							if ok {
+								if fedInt, ok := fedValue.(float64); ok && int(fedInt) == 1 {
+									fmt.Println("giftJson[QQ][fed] is 1")
+
+									if fedValue == 1 {
+										// 调整投点结果的概率分布
+				
+										diceResult = UnbalancedRandomness()
+										diceResultExists = true
+										giftJson[uid] = map[string]interface{}{
+											"fed":  0,
+										}
+				
+										giftJsonStr, err := json.Marshal(giftJson)
+										if err != nil {
+											fmt.Println("编组Json时出错:", err)
+										}
+				
+										if err := ext.StorageSet("giftJson", string(giftJsonStr)); err != nil {
+											fmt.Println("储存giftJson数据时出错:", err)
+										}
+										
+									}
+								} else {
+									fmt.Println("giftJson[QQ][fed] is not 1")
+								}
+							} else {
+								fmt.Println("giftJson[QQ] or giftJson[QQ][fed] not found")
+							}
 						}
 					}
-
+		
+					
 					if err == nil {
 						matched = r.GetMatched()
 						if forWhat == "" {
