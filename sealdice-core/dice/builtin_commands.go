@@ -1232,17 +1232,18 @@ func (d *Dice) registerCoreCommands() {
 							DefaultDiceSideNum: getDefaultDicePoints(ctx),
 							DisableBlock:       true,
 						})
-					}
-					
-					if err := StorageInit(); err != nil {
-						fmt.Println("Error initializing storage:", err)
-						return err
+					}			
+
+					ext := ctx.Dice.ExtFind("好感")
+					if ext == nil {
+						ReplyToSender(ctx, msg, "没有找到插件"+extName)
+						return ""
 					}
 
-					giftJsonStr, err := StorageGet("giftJson")
+					giftJsonStr, err := ext.StorageGet("giftJson")
 					if err != nil {
 						fmt.Println("Error getting giftJson:", err)
-						return err
+						return ""
 					}
 
 					if giftJsonStr == "" {
@@ -1250,9 +1251,10 @@ func (d *Dice) registerCoreCommands() {
 					}
 
 					var giftJson map[string]interface{}
+					
 					if err := json.Unmarshal([]byte(giftJsonStr), &giftJson); err != nil {
 						fmt.Println("Error parsing JSON:", err)
-						return err
+						return ""
 					}
 
 					getID := func() string {
@@ -1295,30 +1297,16 @@ func (d *Dice) registerCoreCommands() {
 							"fed":  0,
 						}
 
-						giftJsonStr, err := json.Marshal(giftJson[uid])
+						giftJsonStr, err := json.Marshal(giftJson)
 						if err != nil {
-							fmt.Println("Error marshaling giftJson:", err)
-							return err
+							fmt.Println("Error marshaling JSON:", err)
+							return ""
 						}
 
-						if err := StorageSet(uid, string(giftJsonStr)); err != nil {
-							fmt.Println("Error setting giftJson:", err)
-							return err
+						if err := ext.StorageSet("giftJson", string(jsonString)); err != nil {
+							fmt.Println("Error setting data:", err)
+							return ""
 						}
-
-						storedJson, err := StorageGet(uid)
-						if err != nil {
-							fmt.Println("Error getting giftJson:", err)
-							return err
-						}
-					
-						var storedGiftJson map[string]interface{}
-						if err := json.Unmarshal([]byte(storedJson), &storedGiftJson); err != nil {
-							fmt.Println("Error unmarshaling storedJson:", err)
-							return err
-						}
-					
-						fmt.Println("Stored giftJson:", storedGiftJson)
 						
 					}else{
 						if r != nil && r.TypeId == ds.VMTypeInt {

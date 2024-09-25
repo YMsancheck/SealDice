@@ -221,7 +221,7 @@ func (i *ExtInfo) StorageGet(k string) (string, error) {
 	return val, err
 }
 
-func calculateWeight(x int) float64 {
+func calculateWeight(x int64) float64 {
 	if x <= 50 {
 		return 2 - 0.02*float64(x)
 	}
@@ -242,11 +242,11 @@ func calculateCDF(weights []float64) []float64 {
 	return cdfValues
 }
 
-func UnbalancedRandomness() int {
+func UnbalancedRandomness() int64 {
 	// 示例数据
 	inputs := make([]int64, 100)
 	for i := 1; i <= 100; i++ {
-		inputs[i-1] = i
+		inputs[i-1] = int64(i)
 	}
 
 	// 计算权重值
