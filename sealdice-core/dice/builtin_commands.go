@@ -1299,7 +1299,8 @@ func (d *Dice) registerCoreCommands() {
 										if err := ext.StorageSet("giftJson", string(giftJsonStr)); err != nil {
 											fmt.Println("储存giftJson数据时出错:", err)
 										}
-										
+
+										ReplyToSender(ctx, msg, "测试成功")
 									}
 								} else {
 									fmt.Println("giftJson[QQ][fed] is not 1")
