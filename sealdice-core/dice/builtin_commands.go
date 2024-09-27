@@ -1298,13 +1298,12 @@ func (d *Dice) registerCoreCommands() {
 
 							fedValue, ok := giftJson[uid].(map[string]interface{})["fed"]
 
-							ReplyToSender(ctx, msg, "测试断点9" + string(fedValue))
+							ReplyToSender(ctx, msg, "测试断点9")
 
 							if ok {
 								if fedInt, ok := fedValue.(float64); ok && int(fedInt) == 1 {
-									fmt.Println("giftJson[QQ][fed] is 1")
 
-									ReplyToSender(ctx, msg, "测试断点10")
+									ReplyToSender(ctx, msg, "测试断点10"+"giftJson[QQ][fed] is 1")
 
 									if fedValue == 1 {
 										// 调整投点结果的概率分布
@@ -1319,26 +1318,25 @@ func (d *Dice) registerCoreCommands() {
 				
 										giftJsonStr, err := json.Marshal(giftJson)
 										if err != nil {
-											fmt.Println("编组Json时出错:", err)
+											ReplyToSender(ctx, msg, "编组Json时出错:")
 										}
 
 										ReplyToSender(ctx, msg, "测试断点12")
 				
 										if err := ext.StorageSet("giftJson", string(giftJsonStr)); err != nil {
-											fmt.Println("储存giftJson数据时出错:", err)
+											ReplyToSender(ctx, msg, "储存giftJson数据时出错:")
 										}
 
 										ReplyToSender(ctx, msg, "测试成功")
 									}
 								} else {
 
-									ReplyToSender(ctx, msg, "测试断点13")
-									fmt.Println("giftJson[QQ][fed] is not 1")
+									ReplyToSender(ctx, msg, "测试断点13"+"giftJson[QQ][fed] is not 1")
 								}
 							} else {
 
-								ReplyToSender(ctx, msg, "测试断点14")
-								fmt.Println("giftJson[QQ] or giftJson[QQ][fed] not found")
+								ReplyToSender(ctx, msg, "测试断点14"+"giftJson[QQ] or giftJson[QQ][fed] not found")
+								
 							}
 						}
 					}
