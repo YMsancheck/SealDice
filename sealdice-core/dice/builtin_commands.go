@@ -1298,7 +1298,7 @@ func (d *Dice) registerCoreCommands() {
 
 							fedValue, ok := giftJson[uid].(map[string]interface{})["fed"]
 
-							ReplyToSender(ctx, msg, "测试断点9"+fedValue)
+							ReplyToSender(ctx, msg, "测试断点9" + string(fedValue))
 
 							if ok {
 								if fedInt, ok := fedValue.(float64); ok && int(fedInt) == 1 {
