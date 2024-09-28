@@ -1240,13 +1240,16 @@ func (d *Dice) registerCoreCommands() {
 					}
 
 					getID := func() string {
+
+						ReplyToSender(ctx, msg,  cmdArgs.GetArgN(0))
+						ReplyToSender(ctx, msg,  cmdArgs.GetArgN(1))
+						ReplyToSender(ctx, msg,  cmdArgs.GetArgN(2))
+						
 						if cmdArgs.IsArgEqual(2, "user") || cmdArgs.IsArgEqual(2, "group") {
 							id := cmdArgs.GetArgN(3)
 							if id == "" {
 								ReplyToSender(ctx, msg, "获取ID失败，第三个参数不是'user'也不是'group'" )
-								ReplyToSender(ctx, msg,  cmdArgs.GetArgN(0))
-								ReplyToSender(ctx, msg,  cmdArgs.GetArgN(1))
-								ReplyToSender(ctx, msg,  cmdArgs.GetArgN(2))
+
 								return ""
 							}
 		
