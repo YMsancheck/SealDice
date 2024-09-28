@@ -1193,8 +1193,6 @@ func (d *Dice) registerCoreCommands() {
 				return CmdExecuteResult{Matched: true, Solved: true, ShowHelp: true}
 			}
 
-			ReplyToSender(ctx, msg, "测试断点-1")
-
 			ctx.SystemTemplate = ctx.Group.GetCharTemplate(ctx.Dice)
 			if ctx.Dice.CommandCompatibleMode {
 				if (cmdArgs.Command == "rd" || cmdArgs.Command == "rhd" || cmdArgs.Command == "rdh") && len(cmdArgs.Args) >= 1 {
@@ -1207,8 +1205,6 @@ func (d *Dice) registerCoreCommands() {
 					}
 				}
 			}
-
-			ReplyToSender(ctx, msg, "测试断点-2")
 
 			var r *VMResultV2m
 			var commandInfoItems []any
@@ -1225,8 +1221,6 @@ func (d *Dice) registerCoreCommands() {
 						V2Only:             true,
 					})
 
-					ReplyToSender(ctx, msg, "测试断点0")
-
 					if r != nil && !r.IsCalculated() {
 						forWhat = cmdArgs.CleanArgs
 
@@ -1239,75 +1233,66 @@ func (d *Dice) registerCoreCommands() {
 							DisableBlock:       true,
 						})
 					}
-					
-					ReplyToSender(ctx, msg, "测试断点1")
 
 					if r != nil && r.TypeId == ds.VMTypeInt {
 						diceResult = int64(r.MustReadInt())
 						diceResultExists = true
 					}
 
-					ReplyToSender(ctx, msg, "测试断点2")
-
 					getID := func() string {
 						if cmdArgs.IsArgEqual(2, "user") || cmdArgs.IsArgEqual(2, "group") {
 							id := cmdArgs.GetArgN(3)
 							if id == "" {
-								ReplyToSender(ctx, msg, "没有找到ID")
+								return ""
 							}
-
+		
 							isGroup := cmdArgs.IsArgEqual(2, "group")
 							return FormatDiceID(ctx, id, isGroup)
 						}
-
+		
 						arg := cmdArgs.GetArgN(2)
 						if !strings.Contains(arg, ":") {
-							ReplyToSender(ctx, msg, "没有找到ID")
+							return ""
 						}
 						return arg
 					}
 
 					ext := ctx.Dice.ExtFind("好感")
 
-					ReplyToSender(ctx, msg, "测试断点3")
-
 					if ext == nil {
 						ReplyToSender(ctx, msg, "没有找到插件"+"好感")
 					}else{
-						giftJsonStr, err := ext.StorageGet("giftJson")
-						if err != nil {
-							ReplyToSender(ctx, msg, "测试断点4")
-							fmt.Println("无法正确获取giftJson:", err)
-						}else{
 
-							ReplyToSender(ctx, msg, "测试断点5")
+						giftJsonStr, err := ext.StorageGet("giftJson")
+
+						if err != nil {
+
+							ReplyToSender(ctx, msg, "测试断点1," + "无法正确获取giftJson:" + err )
+
+						}else{
 
 							if giftJsonStr == "" {
 								giftJsonStr = "{}"
 							}
 
-							ReplyToSender(ctx, msg, "测试断点6")
-
 							var giftJson map[string]interface{}
 					
 							if err := json.Unmarshal([]byte(giftJsonStr), &giftJson); err != nil {
-								fmt.Println("解析Json时出错:", err)
+								ReplyToSender(ctx, msg, "测试断点2," + "解析Json时出错:" + err)
 							}
-
-							ReplyToSender(ctx, msg, "测试断点7")
 
 							uid := getID()
 
-							ReplyToSender(ctx, msg, "测试断点8")
+							ReplyToSender(ctx, msg, "测试断点3" + uid )
 
 							fedValue, ok := giftJson[uid].(map[string]interface{})["fed"]
 
-							ReplyToSender(ctx, msg, "测试断点9")
+							ReplyToSender(ctx, msg, "测试断点4")
 
 							if ok {
 								if fedInt, ok := fedValue.(float64); ok && int(fedInt) == 1 {
 
-									ReplyToSender(ctx, msg, "测试断点10"+"giftJson[QQ][fed] is 1")
+									ReplyToSender(ctx, msg, "测试断点5"+"giftJson[QQ][fed] is 1")
 
 									if fedValue == 1 {
 										// 调整投点结果的概率分布
@@ -1318,14 +1303,14 @@ func (d *Dice) registerCoreCommands() {
 											"fed":  0,
 										}
 
-										ReplyToSender(ctx, msg, "测试断点11")
+										ReplyToSender(ctx, msg, "测试断点6")
 				
 										giftJsonStr, err := json.Marshal(giftJson)
 										if err != nil {
 											ReplyToSender(ctx, msg, "编组Json时出错:")
 										}
 
-										ReplyToSender(ctx, msg, "测试断点12")
+										ReplyToSender(ctx, msg, "测试断点7")
 				
 										if err := ext.StorageSet("giftJson", string(giftJsonStr)); err != nil {
 											ReplyToSender(ctx, msg, "储存giftJson数据时出错:")
@@ -1335,11 +1320,11 @@ func (d *Dice) registerCoreCommands() {
 									}
 								} else {
 
-									ReplyToSender(ctx, msg, "测试断点13"+"giftJson[QQ][fed] is not 1")
+									ReplyToSender(ctx, msg, "测试断点8"+"giftJson[QQ][fed] is not 1")
 								}
 							} else {
 
-								ReplyToSender(ctx, msg, "测试断点14"+"giftJson[QQ] or giftJson[QQ][fed] not found")
+								ReplyToSender(ctx, msg, "测试断点9"+"giftJson[QQ] or giftJson[QQ][fed] not found")
 
 							}
 						}
