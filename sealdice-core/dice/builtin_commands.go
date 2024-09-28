@@ -1267,7 +1267,7 @@ func (d *Dice) registerCoreCommands() {
 
 						if err != nil {
 
-							ReplyToSender(ctx, msg, "测试断点1," + "无法正确获取giftJson:" + err )
+							ReplyToSender(ctx, msg, "测试断点1," + "无法正确获取giftJson"  )
 
 						}else{
 
@@ -1278,7 +1278,7 @@ func (d *Dice) registerCoreCommands() {
 							var giftJson map[string]interface{}
 					
 							if err := json.Unmarshal([]byte(giftJsonStr), &giftJson); err != nil {
-								ReplyToSender(ctx, msg, "测试断点2," + "解析Json时出错:" + err)
+								ReplyToSender(ctx, msg, "测试断点2," + "解析Json时出错" )
 							}
 
 							uid := getID()
