@@ -1193,6 +1193,8 @@ func (d *Dice) registerCoreCommands() {
 				return CmdExecuteResult{Matched: true, Solved: true, ShowHelp: true}
 			}
 
+			ReplyToSender(ctx, msg, "测试断点-1")
+
 			ctx.SystemTemplate = ctx.Group.GetCharTemplate(ctx.Dice)
 			if ctx.Dice.CommandCompatibleMode {
 				if (cmdArgs.Command == "rd" || cmdArgs.Command == "rhd" || cmdArgs.Command == "rdh") && len(cmdArgs.Args) >= 1 {
@@ -1205,6 +1207,8 @@ func (d *Dice) registerCoreCommands() {
 					}
 				}
 			}
+
+			ReplyToSender(ctx, msg, "测试断点-2")
 
 			var r *VMResultV2m
 			var commandInfoItems []any
@@ -1336,7 +1340,7 @@ func (d *Dice) registerCoreCommands() {
 							} else {
 
 								ReplyToSender(ctx, msg, "测试断点14"+"giftJson[QQ] or giftJson[QQ][fed] not found")
-								
+
 							}
 						}
 					}
