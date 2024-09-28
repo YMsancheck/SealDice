@@ -1243,6 +1243,10 @@ func (d *Dice) registerCoreCommands() {
 						if cmdArgs.IsArgEqual(2, "user") || cmdArgs.IsArgEqual(2, "group") {
 							id := cmdArgs.GetArgN(3)
 							if id == "" {
+								ReplyToSender(ctx, msg, "获取ID失败，第三个参数不是'user'也不是'group'" )
+								ReplyToSender(ctx, msg,  cmdArgs.GetArgN(0))
+								ReplyToSender(ctx, msg,  cmdArgs.GetArgN(1))
+								ReplyToSender(ctx, msg,  cmdArgs.GetArgN(2))
 								return ""
 							}
 		
@@ -1252,6 +1256,7 @@ func (d *Dice) registerCoreCommands() {
 		
 						arg := cmdArgs.GetArgN(2)
 						if !strings.Contains(arg, ":") {
+							ReplyToSender(ctx, msg, "获取ID失败，没有找到':'" )
 							return ""
 						}
 						return arg
@@ -1283,7 +1288,8 @@ func (d *Dice) registerCoreCommands() {
 
 							uid := getID()
 
-							ReplyToSender(ctx, msg, "测试断点3" + uid )
+							ReplyToSender(ctx, msg, uid )
+							ReplyToSender(ctx, msg, "测试断点3" )
 
 							fedValue, ok := giftJson[uid].(map[string]interface{})["fed"]
 
